@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+
+from os import path
+from datetime import datetime
+
+from sqlite3 import connect
+
+from launchpadlib.launchpad import Launchpad
+
+USER = 'ack'
+
+DATABASE = 'karma.sqlite'
+
+
+class NotConnected(Exception):
+    '''Not connected to the database'''
+
+
+class Database:
+    '''SQLite3 database wrapper.'''
+
+    def __init__(self, filename):
+        self._filename = filename
+        self._conn = None
+        self._cur = None
+
+    def connect(self):
+        '''Connect to the database.'''
+        must_create = not path.exists(self._filename)
+        self._conn = connect(self._filename)
+        self._cur = self._conn.cursor()
+        if must_create:
+            self._create()
+
+    def add_karma(self, date, value):
+        '''Add value for the specified date.'''
+        params = list(date) + [value]
+        print(params)
+        self._execute(
+            'INSERT INTO karma (year, month, day, value) VALUES (?, ?, ?, ?)',
+            params)
+
+    def close(self):
+        if not self._conn:
+            raise NotConnected()
+        self._conn.close()
+        self._conn = None
+        self._cur = None
+
+    def _create(self):
+        '''Create database tables.'''
+        self._execute(
+            'CREATE TABLE karma ('
+            '  year INTEGER NOT NULL,'
+            '  month INTEGER NOT NULL,'
+            '  day INTEGER NOT NULL,'
+            '  value INTEGER NOT NULL)')
+
+    def _execute(self, statement, args=None):
+        '''Execute a query'''
+        if not self._conn:
+            raise NotConnected()
+
+        with self._conn:
+            if args is None:
+                self._cur.execute(statement)
+            else:
+                self._cur.execute(statement, args)
+            return self._cur.fetchall()
+
+
+def get_karma(user):
+    '''Return the karma for a user.'''
+    lp = get_launchpad()
+    return lp.people[USER].karma
+
+
+def get_launchpad():
+    '''Get a Launchpad instance.'''
+    cachedir = path.expanduser('~/.launchpadlib/api.launchpad.net/cache')
+    return Launchpad.login_anonymously('launchpadlib', 'production', cachedir)
+
+
+def today():
+    '''Return a tuple with current (year, month, day).'''
+    now = datetime.utcnow()
+    return now.year, now.month, now.day
+
+
+def main():
+    karma = get_karma(USER)
+
+    db = Database(DATABASE)
+    db.connect()
+    db.add_karma(today(), karma)
+    db.close()
+
+
+if __name__ == '__main__':
+    main()
