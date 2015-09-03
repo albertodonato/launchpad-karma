@@ -34,11 +34,8 @@ class Database:
 
     def add_karma(self, date, value):
         '''Add value for the specified date.'''
-        params = list(date) + [value]
-        print(params)
         self._execute(
-            'INSERT INTO karma (year, month, day, value) VALUES (?, ?, ?, ?)',
-            params)
+            'INSERT INTO karma (date, value) VALUES (?, ?)', [date, value])
 
     def close(self):
         if not self._conn:
@@ -51,9 +48,7 @@ class Database:
         '''Create database tables.'''
         self._execute(
             'CREATE TABLE karma ('
-            '  year INTEGER NOT NULL,'
-            '  month INTEGER NOT NULL,'
-            '  day INTEGER NOT NULL,'
+            '  date TEXT NOT NULL,'
             '  value INTEGER NOT NULL)')
 
     def _execute(self, statement, args=None):
@@ -82,9 +77,8 @@ def get_launchpad():
 
 
 def today():
-    '''Return a tuple with current (year, month, day).'''
-    now = datetime.utcnow()
-    return now.year, now.month, now.day
+    '''Return the current date as a 'YYYY-MM-DD' string.'''
+    return datetime.utcnow().date().isoformat()
 
 
 def main():
