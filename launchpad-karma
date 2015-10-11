@@ -23,9 +23,12 @@ from datetime import datetime, timedelta
 from argparse import ArgumentParser
 
 from sqlite3 import connect, PARSE_DECLTYPES
+from jinja2 import Template
 from matplotlib import pyplot
 from launchpadlib.launchpad import Launchpad
 
+# The dir in which this file is located
+DIR = os.path.dirname(__file__)
 
 LP_USER = 'ack'
 MONTHS = 12
@@ -34,8 +37,6 @@ TARGET_DIR = 'out'
 
 def get_parser():
     parser = ArgumentParser('Collect and graph user karma from Launchpad.')
-    parser.add_argument(
-        '-v', '--verbose', action='store_true', help='verbose output')
     parser.add_argument(
         '--no-update', action='store_true',
         help='don\'t update karma database')
@@ -159,7 +160,7 @@ def get_month_ranges(count=12):
 def generate_plots(db, user, target_dir):
     '''Generate plots in the specified directory.'''
     filenames = []
-    if not os.path.exists(target_dir):
+    if not os.path.isdir(target_dir):
         os.makedirs(target_dir)
 
     for start, end in get_month_ranges():
@@ -181,21 +182,28 @@ def generate_plots(db, user, target_dir):
 
 def generate_page(user, target_dir, filenames):
     """Generate the HTML page for graphs."""
-    pass
+    with open(os.path.join(DIR, 'template.html')) as fd:
+        template = Template(fd.read())
+
+    log('Rendering HTML template')
+    context = {'title': 'Launchpad karma for {}'.format(user)}
+    with open(os.path.join(target_dir, 'index.html'), 'w') as fd:
+        fd.write(template.render(context))
 
 
 def main():
     args = get_parser().parse_args()
 
-    db = Database('karma.sqlite')
+    db_file = os.path.join(DIR, 'karma.sqlite')
+    log('Accessing SQLite database {}'.format(db_file))
+    db = Database(db_file)
     db.connect()
 
     if not args.no_update:
         date = today()
         karma = get_user_karma(LP_USER)
         db.add_karma(date, karma)
-        if args.verbose:
-            log('Karma for user {} on {} is {}'.format(LP_USER, today, karma))
+        log('Karma for user {} on {} is {}'.format(LP_USER, today, karma))
 
     if not args.no_generate:
         filenames = generate_plots(db, LP_USER, TARGET_DIR)
