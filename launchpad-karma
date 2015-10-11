@@ -16,7 +16,8 @@
 # along with launchpad-karma.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-from os import path
+import sys
+import os
 from tempfile import mkdtemp
 from datetime import datetime, timedelta
 from argparse import ArgumentParser
@@ -25,7 +26,10 @@ from sqlite3 import connect, PARSE_DECLTYPES
 from matplotlib import pyplot
 from launchpadlib.launchpad import Launchpad
 
+
 LP_USER = 'ack'
+MONTHS = 12
+TARGET_DIR = 'out'
 
 
 def get_parser():
@@ -55,7 +59,7 @@ class Database:
 
     def connect(self):
         '''Connect to the database.'''
-        must_create = not path.exists(self._filename)
+        must_create = not os.path.exists(self._filename)
         self._conn = connect(self._filename, detect_types=PARSE_DECLTYPES)
         self._cur = self._conn.cursor()
         if must_create:
@@ -109,14 +113,21 @@ class Database:
             return self._cur.fetchall()
 
 
-def plot_karma(data, user, filename):
+def log(message):
+    '''Log a message to stderr'''
+    sys.stderr.write(message + '\n')
+
+
+def plot_karma(data, title, filename):
     '''Plot a list of (date, value) karma points.'''
     x, y = zip(*data)
     pyplot.plot(x, y)
     pyplot.xlabel('Date')
     pyplot.ylabel('Karma')
-    pyplot.title('Launchpad karma for "{}"'.format(user))
+    pyplot.title(title)
+    pyplot.xlim(xmin=1)
     pyplot.savefig(filename)
+    pyplot.close()
 
 
 def get_user_karma(user):
@@ -145,15 +156,46 @@ def get_month_ranges(count=12):
     return ranges
 
 
+def generate_plots(db, user, target_dir):
+    '''Generate plots in the specified dir.'''
+    count = 0
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
+
+    for start, end in get_month_ranges():
+        values = db.get_karma(start=start, end=end)
+        values = [(x.day, y) for x, y in values]
+        if not values:
+            continue
+
+        count += 1
+        log('Generating monthly plot for {}-{:02d}'. format(
+            start.year, start.month))
+        title = start.strftime('Karma for %B %Y')
+        filename = os.path.join(
+            target_dir,
+            'karma-{}-{}-{:02d}.png'.format(user, start.year, start.month))
+        plot_karma(values, title, filename)
+
+    return count
+
+
 def main():
     args = get_parser().parse_args()
-    print(args)
-    return
-    karma = get_user_karma(LP_USER)
 
     db = Database('karma.sqlite')
     db.connect()
-    db.add_karma(today(), karma)
+
+    if not args.no_update:
+        date = today()
+        karma = get_user_karma(LP_USER)
+        db.add_karma(date, karma)
+        if args.verbose:
+            log('Karma for user {} on {} is {}'.format(LP_USER, today, karma))
+
+    if not args.no_generate:
+        count = generate_plots(db, LP_USER, TARGET_DIR)
+
     db.close()
 
 
