@@ -2,7 +2,7 @@
 launchpad-karma
 ===============
 
-A simple script to track your `Launchpad <https;//launchpad.net`>_
+A simple script to track your `Launchpad <https;//launchpad.net>`_
 `karma <https://help.launchpad.net/YourAccount/Karma>`_ over time.
 
 It's meant to be run on a daily basis (usually by ``cron``).  At every
