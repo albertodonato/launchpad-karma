@@ -119,13 +119,13 @@ def log(message):
 
 
 def plot_karma(data, title, filename):
-    '''Plot a list of (date, value) karma points.'''
+    '''Plot a list of (day, value) karma datapoints.'''
     x, y = zip(*data)
     pyplot.plot(x, y)
     pyplot.xlabel('Date')
     pyplot.ylabel('Karma')
     pyplot.title(title)
-    pyplot.xlim(xmin=1)
+    pyplot.xlim((1, data[-1][0]))
     pyplot.savefig(filename)
     pyplot.close()
 
@@ -157,8 +157,8 @@ def get_month_ranges(count=12):
 
 
 def generate_plots(db, user, target_dir):
-    '''Generate plots in the specified dir.'''
-    count = 0
+    '''Generate plots in the specified directory.'''
+    filenames = []
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
@@ -168,16 +168,20 @@ def generate_plots(db, user, target_dir):
         if not values:
             continue
 
-        count += 1
         log('Generating monthly plot for {}-{:02d}'. format(
             start.year, start.month))
-        title = start.strftime('Karma for %B %Y')
-        filename = os.path.join(
-            target_dir,
+        title = start.strftime('%B %Y')
+        filename = (
             'karma-{}-{}-{:02d}.png'.format(user, start.year, start.month))
-        plot_karma(values, title, filename)
+        filenames.append(filename)
+        plot_karma(values, title, os.path.join(target_dir, filename))
 
-    return count
+    return filenames
+
+
+def generate_page(user, target_dir, filenames):
+    """Generate the HTML page for graphs."""
+    pass
 
 
 def main():
@@ -194,7 +198,8 @@ def main():
             log('Karma for user {} on {} is {}'.format(LP_USER, today, karma))
 
     if not args.no_generate:
-        count = generate_plots(db, LP_USER, TARGET_DIR)
+        filenames = generate_plots(db, LP_USER, TARGET_DIR)
+        generate_page(LP_USER, TARGET_DIR, filenames)
 
     db.close()
 
