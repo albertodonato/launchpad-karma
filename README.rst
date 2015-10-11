@@ -9,13 +9,26 @@ run, it collects the karma for the current day and stores it in an
 SQLite database. Then it regenerates graphs and the index HTML page in
 the specified target directory.
 
-Setting it up
--------------
+Installing
+----------
 
 1. get the source tree::
 
      $ git clone https://ack@bitbucket.org/ack/launchpad-karma.git
+
+2. install the following dependencies:
+
+   - launchpadlib
+   - Jinja2
+
+   This can be done via disto packages or with ``pip``::
+
      $ cd launchpad-karma
+     $ pip install -R requirements.txt
+
+
+Setting it up
+-------------
 
 
 2. edit ``launchpad-karma.ini``, setting the ``user`` key to your
