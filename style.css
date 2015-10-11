@@ -4,3 +4,24 @@ body {
     font-family: "Ubuntu";
     font-weight: 300;
 }
+
+header,
+footer {
+    margin: 15px 0;
+}
+
+header h1 {
+    text-align: center;
+}
+
+footer p {
+    font-size: 15px;
+}
+
+.graph-section {
+    margin: 20px 0;
+}
+
+.img-responsive {
+    margin: 0 auto;
+}

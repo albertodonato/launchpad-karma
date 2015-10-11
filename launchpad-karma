@@ -188,7 +188,7 @@ def generate_page(user, target_dir, graphs):
 
     log('Rendering HTML template ')
     context = {
-        'title': 'Launchpad karma for {}'.format(user),
+        'user': user,
         'graphs': graphs}
     with open(os.path.join(target_dir, 'index.html'), 'w') as fd:
         fd.write(template.render(context))
