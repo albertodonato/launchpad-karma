@@ -22,6 +22,7 @@ from tempfile import mkdtemp
 from datetime import datetime, timedelta
 from shutil import copy
 from argparse import ArgumentParser
+from configparser import ConfigParser
 
 from sqlite3 import connect, PARSE_DECLTYPES
 from jinja2 import Template
@@ -30,21 +31,18 @@ from launchpadlib.launchpad import Launchpad
 
 # The dir in which this file is located
 DIR = os.path.dirname(__file__)
+# Configuration file
+CONFIG_FILE = os.path.join(DIR, 'launchpad-karma.ini')
+# Database file
+DB_FILE = os.path.join(DIR, 'karma.sqlite')
+# The HTML template
+TEMPLATE_FILE = os.path.join(DIR, 'template.html')
+# CSS file for HTML page
+CSS_FILE = os.path.join(DIR, 'style.css')
 
-LP_USER = 'ack'
-MONTHS = 12
-TARGET_DIR = 'out'
 
-
-def get_parser():
-    parser = ArgumentParser('Collect and graph user karma from Launchpad.')
-    parser.add_argument(
-        '--no-update', action='store_true',
-        help='don\'t update karma database')
-    parser.add_argument(
-        '--no-generate', action='store_true',
-        help='don\'t generate graphs')
-    return parser
+class MissingConfig(Exception):
+    '''Missing configuration option.'''
 
 
 class NotConnected(Exception):
@@ -143,14 +141,14 @@ def today():
     return datetime.utcnow().date().isoformat()
 
 
-def get_month_ranges(count=12):
-    '''Return date ranges for the specified of months back'''
+def get_month_ranges(months):
+    '''Return date ranges for the specified of months back.'''
     ranges = []
     end = datetime.utcnow().date()
     start = end.replace(day=1)
     ranges.append((start, end))
 
-    for x in range(count - 1):
+    for x in range(months - 1):
         end = start - timedelta(days=1)
         start = end.replace(day=1)
         ranges.append((start, end))
@@ -158,13 +156,13 @@ def get_month_ranges(count=12):
     return ranges
 
 
-def generate_plots(db, user, target_dir):
+def generate_plots(db, user, target_dir, months):
     '''Generate plots in the specified directory.'''
     graphs = []
     if not os.path.isdir(target_dir):
         os.makedirs(target_dir)
 
-    for start, end in get_month_ranges():
+    for start, end in get_month_ranges(months):
         values = db.get_karma(start=start, end=end)
         values = [(x.day, y) for x, y in values]
         if not values:
@@ -185,7 +183,7 @@ def generate_plots(db, user, target_dir):
 
 def generate_page(user, target_dir, graphs):
     """Generate the HTML page for graphs."""
-    with open(os.path.join(DIR, 'template.html')) as fd:
+    with open(TEMPLATE_FILE) as fd:
         template = Template(fd.read())
 
     log('Rendering HTML template ')
@@ -194,26 +192,55 @@ def generate_page(user, target_dir, graphs):
         'graphs': graphs}
     with open(os.path.join(target_dir, 'index.html'), 'w') as fd:
         fd.write(template.render(context))
-    copy(os.path.join(DIR, 'style.css'), target_dir)
+    copy(CSS_FILE, target_dir)
+
+
+def get_parser():
+    '''Return a command line parser'''
+    parser = ArgumentParser('Collect and graph user karma from Launchpad.')
+    parser.add_argument(
+        '--no-update', action='store_true',
+        help='don\'t update karma database')
+    parser.add_argument(
+        '--no-generate', action='store_true',
+        help='don\'t generate graphs')
+    return parser
+
+
+def get_config():
+    '''Return configuration options.'''
+    defaults = {
+        'months': 12,
+        'target-dir': 'output'}
+    parser = ConfigParser(defaults=defaults)
+    parser.read(CONFIG_FILE)
+    config = parser.defaults()
+    config['months'] = int(config['months'])
+    if 'user' not in config:
+        raise MissingConfig('Key "user" must be present in config')
+    return config
 
 
 def main():
     args = get_parser().parse_args()
+    config = get_config()
 
-    db_file = os.path.join(DIR, 'karma.sqlite')
-    log('Accessing SQLite database {}'.format(db_file))
-    db = Database(db_file)
+    log('Accessing SQLite database {}'.format(DB_FILE))
+    db = Database(DB_FILE)
     db.connect()
 
     if not args.no_update:
         date = today()
-        karma = get_user_karma(LP_USER)
+        karma = get_user_karma(config['user'])
         db.add_karma(date, karma)
-        log('Karma for user {} on {} is {}'.format(LP_USER, today, karma))
+        log(
+            'Karma for user {} on {} is {}'.format(
+                config['user'], today, karma))
 
     if not args.no_generate:
-        graphs = generate_plots(db, LP_USER, TARGET_DIR)
-        generate_page(LP_USER, TARGET_DIR, graphs)
+        graphs = generate_plots(
+            db, config['user'], config['target-dir'], config['months'])
+        generate_page(config['user'], config['target-dir'], graphs)
 
     db.close()
 
