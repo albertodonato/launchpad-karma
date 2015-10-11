@@ -1,2 +1,3 @@
 Jinja
 launchpadlib
+matplotlib
