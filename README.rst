@@ -14,7 +14,7 @@ Installing
 
 1. get the source tree::
 
-     $ git clone https://ack@bitbucket.org/ack/launchpad-karma.git
+     $ git clone https://bitbucket.org/ack/launchpad-karma.git
 
 2. install the following dependencies:
 
