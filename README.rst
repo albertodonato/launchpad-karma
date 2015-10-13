@@ -18,8 +18,9 @@ Installing
 
 2. install the following dependencies:
 
-   - launchpadlib
    - Jinja2
+   - launchpadlib
+   - matplotlib
 
    This can be done via disto packages or with ``pip``::
 

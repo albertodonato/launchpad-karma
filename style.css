@@ -5,6 +5,12 @@ body {
     font-weight: 300;
 }
 
+a,
+a:visited,
+a:focus {
+    text-decoration: none;
+}
+
 header,
 footer {
     margin: 15px 0;

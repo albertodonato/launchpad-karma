@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 #
+# Copyright 2015 - Alberto Donato
+#
 # This file is part of launchpad-karma.
 #
 # launchpad-karma is free software: you can redistribute it and/or
@@ -121,12 +123,12 @@ def log(message):
 def plot_karma(data, title, filename):
     '''Plot a list of (day, value) karma datapoints.'''
     x, y = zip(*data)
-    pyplot.plot(x, y)
+    pyplot.plot(x, y, linewidth=2.0)
     pyplot.xlabel('Date')
     pyplot.ylabel('Karma')
     pyplot.title(title)
     pyplot.xlim((1, data[-1][0]))
-    pyplot.savefig(filename)
+    pyplot.savefig(filename, transparent=True)
     pyplot.close()
 
 
@@ -235,7 +237,7 @@ def main():
         db.add_karma(date, karma)
         log(
             'Karma for user {} on {} is {}'.format(
-                config['user'], today, karma))
+                config['user'], date, karma))
 
     if not args.no_generate:
         graphs = generate_plots(
