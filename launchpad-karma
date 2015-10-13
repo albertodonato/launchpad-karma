@@ -28,6 +28,8 @@ from configparser import ConfigParser
 
 from sqlite3 import connect, PARSE_DECLTYPES
 from jinja2 import Template
+import matplotlib
+matplotlib.use("Agg")
 from matplotlib import pyplot
 from launchpadlib.launchpad import Launchpad
 
