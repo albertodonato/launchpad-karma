@@ -28,6 +28,11 @@ footer p {
     margin: 20px 0;
 }
 
-.img-responsive {
+.graph {
+    display: inline-block;
     margin: 0 auto;
+}
+
+.graph figcaption {
+    text-align: center;
 }

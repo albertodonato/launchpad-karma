@@ -17,5 +17,5 @@ var plot_graph = function(graphData) {
 };
 
 {% for graph in graphs %}
-x = plot_graph({{ graph | json }});
+plot_graph({{ graph | json }});
 {% endfor %}

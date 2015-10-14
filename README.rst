@@ -6,8 +6,9 @@ A simple script to track your `Launchpad karma
 
 It's meant to be run on a daily basis (usually by ``cron``).  At every
 run, it collects the karma for the current day and stores it in an
-SQLite database. Then it regenerates graphs and the index HTML page in
-the specified target directory.
+SQLite database. Then it regenerates an HTML page with graphs (along
+with related JavaScript and css files) in the specified target
+directory.
 
 Installing
 ----------
@@ -20,7 +21,6 @@ Installing
 
    - Jinja2
    - launchpadlib
-   - matplotlib
 
    This can be done via disto packages or with ``pip``::
 
