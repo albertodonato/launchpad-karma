@@ -25,12 +25,10 @@ from datetime import datetime, timedelta
 from shutil import copy
 from argparse import ArgumentParser
 from configparser import ConfigParser
+import json
 
 from sqlite3 import connect, PARSE_DECLTYPES
-from jinja2 import Template
-import matplotlib
-matplotlib.use("Agg")
-from matplotlib import pyplot
+from jinja2 import Environment, FileSystemLoader
 from launchpadlib.launchpad import Launchpad
 
 # The dir in which this file is located
@@ -39,8 +37,6 @@ DIR = os.path.dirname(__file__)
 CONFIG_FILE = os.path.join(DIR, 'launchpad-karma.ini')
 # Database file
 DB_FILE = os.path.join(DIR, 'karma.sqlite')
-# The HTML template
-TEMPLATE_FILE = os.path.join(DIR, 'template.html')
 # CSS file for HTML page
 CSS_FILE = os.path.join(DIR, 'style.css')
 
@@ -122,18 +118,6 @@ def log(message):
     sys.stderr.write(message + '\n')
 
 
-def plot_karma(data, title, filename):
-    '''Plot a list of (day, value) karma datapoints.'''
-    x, y = zip(*data)
-    pyplot.plot(x, y, linewidth=2.0)
-    pyplot.xlabel('Date')
-    pyplot.ylabel('Karma')
-    pyplot.title(title)
-    pyplot.xlim((1, data[-1][0]))
-    pyplot.savefig(filename, transparent=True)
-    pyplot.close()
-
-
 def get_user_karma(user):
     '''Return the karma for a user.'''
     lp = Launchpad.login_anonymously('launchpadlib', 'production', mkdtemp())
@@ -160,42 +144,44 @@ def get_month_ranges(months):
     return ranges
 
 
-def generate_plots(db, user, target_dir, months):
-    '''Generate plots in the specified directory.'''
+def get_graph_data(db, months):
+    '''Return data for graphs.'''
     graphs = []
-    if not os.path.isdir(target_dir):
-        os.makedirs(target_dir)
-
     for start, end in get_month_ranges(months):
         values = db.get_karma(start=start, end=end)
-        values = [(x.day, y) for x, y in values]
         if not values:
             continue
+        x, y = zip(*((x.day, y) for x, y in values))
 
-        log('Generating monthly plot for {}-{:02d}'. format(
-            start.year, start.month))
-        title = start.strftime('%B %Y')
-        filename = (
-            'karma-{}-{}-{:02d}.png'.format(user, start.year, start.month))
+        month_of_year = '{:04d}-{:02d}'.format(start.year, start.month)
+        log('Collected data for {}'.format(month_of_year))
         graphs.append(
-            {'url': filename,
-             'month': title})
-        plot_karma(values, title, os.path.join(target_dir, filename))
-
+            {'id': 'graph-{}'.format(month_of_year),
+             'label': start.strftime('Karma for %B %Y'),
+             'x': x,
+             'y': y})
     return graphs
 
 
 def generate_page(user, target_dir, graphs):
     """Generate the HTML page for graphs."""
-    with open(TEMPLATE_FILE) as fd:
-        template = Template(fd.read())
+    if not os.path.isdir(target_dir):
+        os.makedirs(target_dir)
 
-    log('Rendering HTML template ')
+    environment = Environment(loader=FileSystemLoader(DIR))
+    environment.filters['json'] = json.dumps
+    html_template = environment.get_template('template.html')
+    js_template = environment.get_template('template.js')
+
     context = {
         'user': user,
         'graphs': graphs}
+    log('Rendering HTML template')
     with open(os.path.join(target_dir, 'index.html'), 'w') as fd:
-        fd.write(template.render(context))
+        fd.write(html_template.render(context))
+    log('Rendering JS template')
+    with open(os.path.join(target_dir, 'plot.js'), 'w') as fd:
+        fd.write(js_template.render(context))
     copy(CSS_FILE, target_dir)
 
 
@@ -242,8 +228,7 @@ def main():
                 config['user'], date, karma))
 
     if not args.no_generate:
-        graphs = generate_plots(
-            db, config['user'], config['target-dir'], config['months'])
+        graphs = get_graph_data(db, config['months'])
         generate_page(config['user'], config['target-dir'], graphs)
 
     db.close()

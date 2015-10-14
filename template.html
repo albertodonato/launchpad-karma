@@ -7,8 +7,11 @@
     
     <title>Launchpad karma for user {{ user }}</title>
 
-    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Ubuntu:300,500">
+    <script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js" defer></script>
+    <script type="application/javascript" src="plot.js" defer></script>
+
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu:300,500">
     <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   
@@ -25,10 +28,10 @@
       <div class="container">
         {% for graph in graphs %}
         <section class="graph-section">
-          <div class="graph">
-            <img class="img-responsive"
-                 src="{{ graph.url }}" alt="Karma for {{ graph.month }}">
-          </div>
+          <figure class="graph">
+            <canvas id="{{ graph.id }}">
+            <figcaption>{{ graph.label }}</figcaption>
+          </figure>
         </section>
         {% endfor %}
       </div>
