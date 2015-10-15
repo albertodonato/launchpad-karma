@@ -163,7 +163,7 @@ def get_graph_data(db, months):
     return graphs
 
 
-def generate_page(user, target_dir, graphs):
+def generate_page(user, target_dir, graphs, local=False):
     """Generate the HTML page for graphs."""
     if not os.path.isdir(target_dir):
         os.makedirs(target_dir)
@@ -175,6 +175,7 @@ def generate_page(user, target_dir, graphs):
 
     context = {
         'user': user,
+        'resource_proto': 'https:' if local else '',
         'graphs': graphs}
     log('Rendering HTML template')
     with open(os.path.join(target_dir, 'index.html'), 'w') as fd:
@@ -194,6 +195,10 @@ def get_parser():
     parser.add_argument(
         '--no-generate', action='store_true',
         help='don\'t generate graphs')
+    parser.add_argument(
+        '--local', action='store_true',
+        help=('Set protocol for web resources so that generated page can '
+              'be viewed locally.'))
     return parser
 
 
@@ -229,7 +234,8 @@ def main():
 
     if not args.no_generate:
         graphs = get_graph_data(db, config['months'])
-        generate_page(config['user'], config['target-dir'], graphs)
+        generate_page(
+            config['user'], config['target-dir'], graphs, local=args.local)
 
     db.close()
 
