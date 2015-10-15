@@ -32,9 +32,10 @@ Setting it up
 -------------
 
 
-2. edit ``launchpad-karma.ini``, setting the ``user`` key to your
-   launchpad username.  The target directory for graphs and and the
-   (maximum) number of months to plot can also be changed.
+2. copy ``launchpad-karma.ini.template`` to ``launchpad-karma.ini``
+   and edit it setting the ``user`` key to your launchpad username.
+   The target directory for graphs and and the (maximum) number of
+   months to plot can also be changed.
 
 
 3. edit your crontab::
