@@ -1,3 +1,23 @@
+{#
+Author: Alberto Donato
+
+This file is part of launchpad-karma.
+
+launchpad-karma is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+launchpad-karma is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with launchpad-karma.  If not, see
+<http://www.gnu.org/licenses/>.
+#}
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -18,7 +38,7 @@
   <body>
     <header>
       <div class="container">
-        <h1 class="title">
+        <h1 class="title text-center">
           Launchpad karma for user
           <a href="https://launchpad.net/~{{ user }}">{{ user }}</a>
         </h1>
@@ -29,8 +49,10 @@
         {% for graph in graphs %}
         <section class="graph-section">
           <figure class="graph">
-            <canvas id="{{ graph.id }}"></canvas>
-            <figcaption>{{ graph.label }}</figcaption>
+            <canvas id="{{ graph.id }}" class="graph-canvas"></canvas>
+            <figcaption class="graph-caption text-center">
+              {{ graph.label }}
+              </figcaption>
           </figure>
         </section>
         {% endfor %}
@@ -39,7 +61,7 @@
   </body>
   <footer>
     <div class="container">
-      <p>
+      <p class="text-center">
         Generated with <a href="http://bitbucket.org/ack/launchpad-karma">launchpad-karma</a>.
       </p>
     </div>

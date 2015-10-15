@@ -16,23 +16,30 @@ footer {
     margin: 15px 0;
 }
 
-header h1 {
-    text-align: center;
-}
-
 footer p {
     font-size: 15px;
 }
 
 .graph-section {
-    margin: 20px 0;
+    margin-top: 20px;
+    margin-bottom: 40px;
 }
 
 .graph {
-    display: inline-block;
-    margin: 0 auto;
+    margin: 0 10%;
 }
 
-.graph figcaption {
-    text-align: center;
+@media (min-width: 960px) {
+    .graph {
+        margin: 0 20%
+    }
+}
+
+.graph-canvas {
+    width: 100% !important;
+    height: auto !important;
+}
+
+.graph-caption {
+    margin-top: 10px;
 }
