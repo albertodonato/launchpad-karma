@@ -20,6 +20,7 @@
 
 import sys
 import os
+from itertools import chain
 from tempfile import mkdtemp
 from datetime import datetime, timedelta
 from shutil import copy
@@ -163,8 +164,20 @@ def get_graph_data(db, months):
     return graphs
 
 
-def generate_page(user, target_dir, graphs, local=False):
-    """Generate the HTML page for graphs."""
+def get_graph_steps(graphs, step_width=50):
+    '''Return graph steps based on values from all graphs.'''
+    min_y = min(chain(*(graph['y'] for graph in graphs)))
+    max_y = max(chain(*(graph['y'] for graph in graphs)))
+    min_value = int(min_y / step_width) * step_width
+    max_value = int(max_y / step_width) * step_width + step_width
+    num_steps = int((max_value - min_value) / step_width)
+    if (max_value - min_value) % step_width:
+        num_steps + 1
+    return min_value, num_steps, step_width
+
+
+def generate_page(user, target_dir, graphs, graph_steps, local=False):
+    '''Generate the HTML page for graphs.'''
     if not os.path.isdir(target_dir):
         os.makedirs(target_dir)
 
@@ -176,6 +189,10 @@ def generate_page(user, target_dir, graphs, local=False):
     context = {
         'user': user,
         'resource_proto': 'https:' if local else '',
+        'graph_config': {
+            'scale_start_value': graph_steps[0],
+            'scale_steps': graph_steps[1],
+            'scale_step_width': graph_steps[2]},
         'graphs': graphs}
     log('Rendering HTML template')
     with open(os.path.join(target_dir, 'index.html'), 'w') as fd:
@@ -234,8 +251,10 @@ def main():
 
     if not args.no_generate:
         graphs = get_graph_data(db, config['months'])
+        graph_steps = get_graph_steps(graphs)
         generate_page(
-            config['user'], config['target-dir'], graphs, local=args.local)
+            config['user'], config['target-dir'], graphs, graph_steps,
+            local=args.local)
 
     db.close()
 
