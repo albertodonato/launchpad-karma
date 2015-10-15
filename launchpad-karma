@@ -23,7 +23,7 @@ import os
 from itertools import chain
 from tempfile import mkdtemp
 from datetime import datetime, timedelta
-from shutil import copy
+from shutil import copy, rmtree
 from argparse import ArgumentParser
 from configparser import ConfigParser
 import json
@@ -121,8 +121,11 @@ def log(message):
 
 def get_user_karma(user):
     '''Return the karma for a user.'''
+    tempdir = mkdtemp(prefix='launchpad-karma-')
     lp = Launchpad.login_anonymously('launchpadlib', 'production', mkdtemp())
-    return lp.people[user].karma
+    karma = lp.people[user].karma
+    rmtree(tempdir, ignore_errors=True)
+    return karma
 
 
 def today():
@@ -205,7 +208,8 @@ def generate_page(user, target_dir, graphs, graph_steps, local=False):
 
 def get_parser():
     '''Return a command line parser'''
-    parser = ArgumentParser('Collect and graph user karma from Launchpad.')
+    parser = ArgumentParser(
+        description='Collect and graph user karma from Launchpad.')
     parser.add_argument(
         '--no-update', action='store_true',
         help='don\'t update karma database')
