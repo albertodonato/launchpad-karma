@@ -115,7 +115,7 @@ class Database:
 
 
 def log(message):
-    '''Log a message to stderr'''
+    '''Log a message to stderr.'''
     sys.stderr.write(message + '\n')
 
 
@@ -161,13 +161,13 @@ def get_graph_data(db, months):
         log('Collected data for {}'.format(month_of_year))
         graphs.append(
             {'id': 'graph-{}'.format(month_of_year),
-             'label': start.strftime('Karma for %B %Y'),
+             'label': start.strftime('%B %Y'),
              'x': x,
              'y': y})
     return graphs
 
 
-def get_graph_steps(graphs, step_width=50):
+def get_graph_steps(graphs, step_width=100):
     '''Return graph steps based on values from all graphs.'''
     min_y = min(chain(*(graph['y'] for graph in graphs)))
     max_y = max(chain(*(graph['y'] for graph in graphs)))
