@@ -205,7 +205,7 @@ def generate_page(user, target_dir, graphs, graph_steps, local=False):
     log('Rendering HTML template')
     with open(os.path.join(target_dir, 'index.html'), 'w') as fd:
         fd.write(html_template.render(context))
-    log('Rendering JS template')
+    log('Rendering JavaScript template')
     with open(os.path.join(target_dir, 'plot.js'), 'w') as fd:
         fd.write(js_template.render(context))
     copy(CSS_FILE, target_dir)
