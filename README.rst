@@ -4,11 +4,10 @@ launchpad-karma
 A simple script to track your `Launchpad karma
 <https://help.launchpad.net/YourAccount/Karma>`_ over time.
 
-It's meant to be run on a daily basis (usually by ``cron``).  At every
-run, it collects the karma for the current day and stores it in an
-SQLite database. Then it regenerates an HTML page with graphs (along
-with related JavaScript and css files) in the specified target
-directory.
+It's meant to be run on a daily basis (usually by ``cron``).  At every run, it
+collects the karma for the current day and stores it in an SQLite
+database. Then it regenerates an HTML page with graphs (along with related
+JavaScript and css files) in the specified target directory.
 
 Installing
 ----------
@@ -32,17 +31,18 @@ Setting it up
 -------------
 
 
-2. copy ``launchpad-karma.ini.template`` to ``launchpad-karma.ini``
-   and edit it setting the ``user`` key to your launchpad username.
-   The target directory for graphs and and the (maximum) number of
-   months to plot can also be changed.
+2. copy ``launchpad-karma.ini.template`` to ``launchpad-karma.ini`` and edit it
+   setting the ``user`` key to your launchpad username.  The target directory
+   for graphs and and the (maximum) number of months to plot can also be
+   changed.
 
 
 3. edit your crontab::
 
      $ crontab -e
 
-   by adding something like this (which makes the script run at 1am each day)::
+   by adding something like this (which makes the script run at 1am every
+   day)::
 
      # m h  dom mon dow   command
      0 1 * * * /home/ack/launchpad-karma/launchpad-karma

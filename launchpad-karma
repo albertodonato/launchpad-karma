@@ -31,11 +31,14 @@ import json
 from sqlite3 import connect, PARSE_DECLTYPES
 from jinja2 import Environment, FileSystemLoader
 from launchpadlib.launchpad import Launchpad
+from launchpadlib.uris import LPNET_SERVICE_ROOT
+
+NAME = 'launchpad-karma'
 
 # The dir in which this file is located
 DIR = os.path.dirname(__file__)
 # Configuration file
-CONFIG_FILE = os.path.join(DIR, 'launchpad-karma.ini')
+CONFIG_FILE = os.path.join(DIR, '{}.ini'.format(NAME))
 # Database file
 DB_FILE = os.path.join(DIR, 'karma.sqlite')
 # CSS file for HTML page
@@ -121,8 +124,10 @@ def log(message):
 
 def get_user_karma(user):
     '''Return the karma for a user.'''
-    tempdir = mkdtemp(prefix='launchpad-karma-')
-    lp = Launchpad.login_anonymously('launchpadlib', 'production', mkdtemp())
+    tempdir = mkdtemp(prefix='{}-'.format(NAME))
+    lp = Launchpad.login_anonymously(
+        NAME, service_root=LPNET_SERVICE_ROOT,
+        launchpadlib_dir=tempdir)
     karma = lp.people[user].karma
     rmtree(tempdir, ignore_errors=True)
     return karma
