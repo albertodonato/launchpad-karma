@@ -1,6 +1,4 @@
 //
-// Author: Alberto Donato
-//
 // This file is part of launchpad-karma.
 //
 // launchpad-karma is free software: you can redistribute it and/or
