@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 
 // Plot a char for specified data
-var plotChart = function(graphData) {
+function plotChart(graphData) {
     var context = document.getElementById(graphData.id).getContext("2d"),
         data = {
             labels: graphData.x,
