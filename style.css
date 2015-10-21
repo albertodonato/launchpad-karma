@@ -29,15 +29,9 @@ footer p {
     margin: 0 10%;
 }
 
-@media (min-width: 960px) {
-    .graph {
-        margin: 0 20%
-    }
-}
-
 .graph-canvas {
     width: 100% !important;
-    height: auto !important;
+    height: 350px;
 }
 
 .graph-caption {
