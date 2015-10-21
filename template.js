@@ -17,7 +17,7 @@
 
 // Plot a char for specified data
 function plotChart(graphData) {
-    var context = document.getElementById(graphData.id).getContext("2d"),
+    var context = document.getElementById(graphData.id).getContext('2d'),
         data = {
             labels: graphData.x,
             datasets: [
