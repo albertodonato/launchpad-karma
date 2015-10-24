@@ -49,5 +49,5 @@ Chart.defaults.global.responsive = true;
 
 // Plot data
 {% for graph in graphs %}
-plotChart({{ graph | json }});
+  plotChart({{ graph | json }});
 {% endfor %}

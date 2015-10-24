@@ -20,9 +20,14 @@ footer p {
     font-size: 15px;
 }
 
-.graph-section {
+.graph-section,
+.extremes-section {
     margin-top: 20px;
     margin-bottom: 40px;
+}
+
+.extremes-section strong {
+    color: #337ab7;
 }
 
 .graph {

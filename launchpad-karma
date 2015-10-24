@@ -76,18 +76,28 @@ class Database:
 
     def get_karma(self, start=None, end=None):
         '''Return karma, optionally for the specify date range.'''
-        query = 'SELECT date, value FROM karma'
-        args = []
-        if start:
-            query += ' WHERE date >= ?'
-            args.append(start)
-        if end:
-            if start:
-                query += ' AND'
-            query += ' date <= ?'
-            args.append(end)
-        query += ' ORDER BY date ASC'
+        where_clause, args = self._get_date_range_clause(start=start, end=end)
+        if where_clause:
+            where_clause = 'WHERE ' + where_clause
+        query = 'SELECT date, value FROM karma {} ORDER BY DATE ASC'.format(
+            where_clause)
         return self._execute(query, args)
+
+    def get_karma_extremes(self, start=None, end=None):
+        '''Return minimum and maximum for karma, as (date, value) tuples.'''
+        where_clause, args = self._get_date_range_clause(start=start, end=end)
+        if where_clause:
+            where_clause = 'WHERE ' + where_clause
+        select_clause = 'SELECT date, value FROM karma'
+        min_query = ' '.join(
+            [select_clause, where_clause,
+             'ORDER BY value ASC, date DESC LIMIT 1'])
+        max_query = ' '.join(
+            [select_clause, where_clause,
+             'ORDER BY value DESC, date DESC LIMIT 1'])
+        min_value = self._execute(min_query, args)[0]
+        max_value = self._execute(max_query, args)[0]
+        return min_value, max_value
 
     def close(self):
         '''Close db connection.'''
@@ -116,6 +126,18 @@ class Database:
                 self._cur.execute(statement, args)
             return self._cur.fetchall()
 
+    def _get_date_range_clause(self, start=None, end=None):
+        '''Return a WHERE clause for the date range.'''
+        args = []
+        clauses = []
+        if start:
+            clauses.append('date >= ?')
+            args.append(start)
+        if end:
+            clauses.append('date <= ?')
+            args.append(end)
+        return ' AND '.join(clauses), args
+
 
 def log(message):
     '''Log a message to stderr.'''
@@ -138,10 +160,18 @@ def today():
     return datetime.utcnow().date().isoformat()
 
 
+def format_date(date):
+    '''Convert date to string.'''
+    return date.strftime('%e %B %Y').strip()
+
+
 def get_month_ranges(months):
-    '''Return date ranges for the specified of months back.'''
+    '''Return date ranges for the specified of months back.
+
+    Return a 3-tuple with (min-date, max-date, ranges).
+    '''
     ranges = []
-    end = datetime.utcnow().date()
+    max_date = end = datetime.utcnow().date()
     start = end.replace(day=1)
     ranges.append((start, end))
 
@@ -150,13 +180,13 @@ def get_month_ranges(months):
         start = end.replace(day=1)
         ranges.append((start, end))
 
-    return ranges
+    return start, max_date, ranges
 
 
-def get_graph_data(db, months):
+def get_graph_data(db, ranges):
     '''Return data for graphs.'''
     graphs = []
-    for start, end in get_month_ranges(months):
+    for start, end in ranges:
         values = db.get_karma(start=start, end=end)
         if not values:
             continue
@@ -184,7 +214,8 @@ def get_graph_steps(graphs, step_width=100):
     return min_value, num_steps, step_width
 
 
-def generate_page(user, target_dir, graphs, graph_steps, local=False):
+def generate_page(user, target_dir, graphs, graph_steps, extremes,
+                  local=False):
     '''Generate the HTML page for graphs.'''
     if not os.path.isdir(target_dir):
         os.makedirs(target_dir)
@@ -193,7 +224,6 @@ def generate_page(user, target_dir, graphs, graph_steps, local=False):
     environment.filters['json'] = json.dumps
     html_template = environment.get_template('template.html')
     js_template = environment.get_template('template.js')
-
     context = {
         'user': user,
         'resource_proto': 'https:' if local else '',
@@ -201,7 +231,14 @@ def generate_page(user, target_dir, graphs, graph_steps, local=False):
             'scale_start_value': graph_steps[0],
             'scale_steps': graph_steps[1],
             'scale_step_width': graph_steps[2]},
-        'graphs': graphs}
+        'graphs': graphs,
+        'extremes': {
+            'min': {
+                'date': format_date(extremes[0][0]),
+                'value': extremes[0][1]},
+            'max': {
+                'date': format_date(extremes[1][0]),
+                'value': extremes[1][1]}}}
     log('Rendering HTML template')
     with open(os.path.join(target_dir, 'index.html'), 'w') as fd:
         fd.write(html_template.render(context))
@@ -259,11 +296,14 @@ def main():
                 config['user'], date, karma))
 
     if not args.no_generate:
-        graphs = get_graph_data(db, config['months'])
+        start_date, end_date, ranges = get_month_ranges(config['months'])
+        graphs = get_graph_data(db, ranges)
         graph_steps = get_graph_steps(graphs)
+        karma_extremes = db.get_karma_extremes(
+            start=start_date, end=end_date)
         generate_page(
             config['user'], config['target-dir'], graphs, graph_steps,
-            local=args.local)
+            karma_extremes, local=args.local)
 
     db.close()
 

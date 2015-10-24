@@ -10,10 +10,8 @@
     <script src="{{ resource_proto }}//cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js" defer></script>
     <script src="plot.js" defer></script>
 
-    <link rel="stylesheet" type="text/css"
-          href="{{ resource_proto }}//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css"
-          href="{{ resource_proto }}//fonts.googleapis.com/css?family=Ubuntu:300,500">
+    <link rel="stylesheet" type="text/css" href="{{ resource_proto }}//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ resource_proto }}//fonts.googleapis.com/css?family=Ubuntu:300,500">
     <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   
@@ -28,15 +26,30 @@
     </header>
     <main>
       <div class="container">
-        {% for graph in graphs %}
-        <section class="graph-section">
-          <figure class="graph">
-            <canvas id="{{ graph.id }}" class="graph-canvas"></canvas>
-            <figcaption class="graph-caption text-center">
-              {{ graph.label }}
-            </figcaption>
-          </figure>
+        <section class="extremes-section">
+          <p class="text-center">
+            Minimum karma:
+            <strong>{{ extremes.min.value }}</strong>
+            on
+            <strong>{{ extremes.min.date }}</strong>
+          </p>
+          <p class="text-center">
+            Maximum karma:
+            <strong>{{ extremes.max.value }}</strong>
+            on
+            <strong>{{ extremes.max.date }}</strong>
+          </p>
         </section>
+
+        {% for graph in graphs %}
+          <section class="graph-section">
+            <figure class="graph">
+              <canvas id="{{ graph.id }}" class="graph-canvas"></canvas>
+              <figcaption class="graph-caption text-center">
+                {{ graph.label }}
+              </figcaption>
+            </figure>
+          </section>
         {% endfor %}
       </div>
     </main>
