@@ -27,8 +27,8 @@ from shutil import copy, rmtree
 from argparse import ArgumentParser
 from configparser import ConfigParser
 import json
-
 from sqlite3 import connect, PARSE_DECLTYPES
+
 from jinja2 import Environment, FileSystemLoader
 from launchpadlib.launchpad import Launchpad
 from launchpadlib.uris import LPNET_SERVICE_ROOT
