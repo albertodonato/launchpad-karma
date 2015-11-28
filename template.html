@@ -26,7 +26,8 @@
     </header>
     <main>
       <div class="container">
-        <section class="extremes-section">
+        <div class="section-extremes">
+          <h2>Overall extreme values</h2>
           <p class="text-center">
             Minimum:
             <strong>{{ extremes.min.value }}</strong>
@@ -39,17 +40,15 @@
             on
             <strong>{{ extremes.max.date }}</strong>
           </p>
-        </section>
+        </div>
 
         {% for graph in graphs %}
-          <section class="graph-section">
-            <figure class="graph">
-              <canvas id="{{ graph.id }}" class="graph-canvas"></canvas>
-              <figcaption class="graph-caption text-center">
-                {{ graph.label }}
-              </figcaption>
-            </figure>
-          </section>
+        <section class="section-graph">
+          <h2>{{ graph.label }}</h2>
+          <figure class="graph">
+            <canvas id="{{ graph.id }}" class="graph-canvas"></canvas>
+          </figure>
+        </section>
         {% endfor %}
       </div>
     </main>

@@ -20,25 +20,22 @@ footer p {
     font-size: 15px;
 }
 
-.graph-section,
-.extremes-section {
-    margin-top: 20px;
-    margin-bottom: 40px;
+.section-extremes,
+.section-graph {
+    margin: 20px 10% 40px;
 }
 
-.extremes-section strong {
+.section-extremes h2,
+.section-graph h2 {
+    font-size: 24px;
+    text-align: center;
+}
+
+.section-extremes strong {
     color: #337ab7;
-}
-
-.graph {
-    margin: 0 10%;
 }
 
 .graph-canvas {
     width: 100% !important;
     height: 350px;
-}
-
-.graph-caption {
-    margin-top: 10px;
 }
