@@ -21,7 +21,7 @@ Installing
    - Jinja2
    - launchpadlib
 
-   This can be done via disto packages or with ``pip``::
+   This can be done via packages from your distribution or with ``pip``::
 
      $ cd launchpad-karma
      $ pip install -R requirements.txt
