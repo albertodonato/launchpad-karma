@@ -41,8 +41,7 @@ Setting it up
 
      $ crontab -e
 
-   by adding something like this (which makes the script run at 1am every
-   day)::
+   by adding something like this (which runs the script at 23:30 every day)::
 
      # m h  dom mon dow   command
-     0 1 * * * /home/ack/launchpad-karma/launchpad-karma
+     30 23 * * * /home/ack/launchpad-karma/launchpad-karma
