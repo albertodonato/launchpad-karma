@@ -217,6 +217,7 @@ def get_graph_steps(graphs, step_width=100):
 def generate_page(user, target_dir, graphs, graph_steps, extremes,
                   local=False):
     '''Generate the HTML page for graphs.'''
+    log('Output directory: {}'.format(target_dir))
     if not os.path.isdir(target_dir):
         os.makedirs(target_dir)
 
