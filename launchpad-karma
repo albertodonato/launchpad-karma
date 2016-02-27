@@ -191,17 +191,12 @@ def get_graph_data(db, ranges):
         values = db.get_karma(start=start, end=end)
         if not values:
             continue
-        x, y = zip(*((x.day, y) for x, y in values))
-        x = list(x)
-        y = list(y)
-        _, last_day_of_month = monthrange(start.year, start.month)
-        last_day = x[-1]
-        missing_days = last_day_of_month - last_day
 
-        if missing_days:
-            # Add null entries for missing days in the month
-            x.extend(range(last_day + 1, last_day_of_month + 1))
-            y.extend([None] * missing_days)
+        day_values = {date.day: value for date, value in values}
+        _, last_day_of_month = monthrange(start.year, start.month)
+
+        x = list(range(1, last_day_of_month + 1))
+        y = [day_values.get(day) for day in x]
 
         month_of_year = '{:04d}-{:02d}'.format(start.year, start.month)
         log('Collected data for {}'.format(month_of_year))
