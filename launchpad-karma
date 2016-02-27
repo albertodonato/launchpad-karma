@@ -33,7 +33,7 @@ from jinja2 import Environment, FileSystemLoader
 from launchpadlib.launchpad import Launchpad
 from launchpadlib.uris import LPNET_SERVICE_ROOT
 
-NAME = os.path.basename('launchpad-karma')
+NAME = os.path.basename(__file__)
 
 # The dir in which this file is located
 DIR = os.path.dirname(__file__)
@@ -310,4 +310,6 @@ def main():
 
 
 if __name__ == '__main__':
+    print(NAME)
+    sys.exit(0)
     main()
