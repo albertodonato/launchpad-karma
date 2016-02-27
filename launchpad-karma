@@ -20,13 +20,13 @@
 
 import sys
 import os
-from itertools import chain
 from contextlib import closing
 from tempfile import mkdtemp
 from datetime import datetime, timedelta
 from shutil import copy, rmtree
 from argparse import ArgumentParser
 from configparser import ConfigParser
+from calendar import monthrange
 import json
 from sqlite3 import connect, PARSE_DECLTYPES
 
@@ -192,6 +192,16 @@ def get_graph_data(db, ranges):
         if not values:
             continue
         x, y = zip(*((x.day, y) for x, y in values))
+        x = list(x)
+        y = list(y)
+        _, last_day_of_month = monthrange(start.year, start.month)
+        last_day = x[-1]
+        missing_days = last_day_of_month - last_day
+
+        if missing_days:
+            # Add null entries for missing days in the month
+            x.extend(range(last_day + 1, last_day_of_month + 1))
+            y.extend([None] * missing_days)
 
         month_of_year = '{:04d}-{:02d}'.format(start.year, start.month)
         log('Collected data for {}'.format(month_of_year))
@@ -203,10 +213,8 @@ def get_graph_data(db, ranges):
     return graphs
 
 
-def get_graph_steps(graphs, step_width=100):
+def get_graph_steps(graphs, min_y, max_y, step_width=100):
     '''Return graph steps based on values from all graphs.'''
-    min_y = min(chain(*(graph['y'] for graph in graphs)))
-    max_y = max(chain(*(graph['y'] for graph in graphs)))
     min_value = int(min_y / step_width) * step_width
     max_value = int(max_y / step_width) * step_width + step_width
     num_steps = int((max_value - min_value) / step_width)
@@ -300,9 +308,10 @@ def main():
         if not args.no_generate:
             start_date, end_date, ranges = get_month_ranges(config['months'])
             graphs = get_graph_data(db, ranges)
-            graph_steps = get_graph_steps(graphs)
             karma_extremes = db.get_karma_extremes(
                 start=start_date, end=end_date)
+            extreme_values = tuple(zip(*karma_extremes))[1]
+            graph_steps = get_graph_steps(graphs, *extreme_values)
             generate_page(
                 config['user'], config['target-dir'], graphs, graph_steps,
                 karma_extremes, local=args.local)
