@@ -33,7 +33,7 @@ from jinja2 import Environment, FileSystemLoader
 from launchpadlib.launchpad import Launchpad
 from launchpadlib.uris import LPNET_SERVICE_ROOT
 
-NAME = 'launchpad-karma'
+NAME = os.path.basename('launchpad-karma')
 
 # The dir in which this file is located
 DIR = os.path.dirname(__file__)
@@ -75,7 +75,7 @@ class Database:
             'INSERT INTO karma (date, value) VALUES (?, ?)', [date, value])
 
     def get_karma(self, start=None, end=None):
-        '''Return karma, optionally for the specify date range.'''
+        '''Return karma, optionally for the specified date range.'''
         where_clause, args = self._get_date_range_clause(start=start, end=end)
         if where_clause:
             where_clause = 'WHERE ' + where_clause
