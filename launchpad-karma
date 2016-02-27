@@ -28,6 +28,7 @@ from argparse import ArgumentParser
 from configparser import ConfigParser
 from calendar import monthrange
 import json
+import math
 from sqlite3 import connect, PARSE_DECLTYPES
 
 from jinja2 import Environment, FileSystemLoader
@@ -44,6 +45,10 @@ CONFIG_FILE = os.path.join(DIR, '{}.ini'.format(NAME))
 DB_FILE = os.path.join(DIR, 'karma.sqlite')
 # CSS file for HTML page
 CSS_FILE = os.path.join(DIR, 'style.css')
+
+# The base number of steps for the graph Y-axis. The actual number can be
+# larger if needed to avoid clipping.
+BASE_GRAPH_STEPS = 10
 
 
 class MissingConfig(Exception):
@@ -208,8 +213,12 @@ def get_graph_data(db, ranges):
     return graphs
 
 
-def get_graph_steps(graphs, min_y, max_y, step_width=100):
+def get_graph_steps(graphs, min_y, max_y):
     '''Return graph steps based on values from all graphs.'''
+    step_width = (max_y - min_y) / BASE_GRAPH_STEPS
+    width_base = 10 ** int(math.log10(step_width))
+    step_width = int(step_width / width_base) * width_base
+
     min_value = int(min_y / step_width) * step_width
     max_value = int(max_y / step_width) * step_width + step_width
     num_steps = int((max_value - min_value) / step_width)
