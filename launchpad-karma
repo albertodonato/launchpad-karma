@@ -21,6 +21,7 @@
 import sys
 import os
 from itertools import chain
+from contextlib import closing
 from tempfile import mkdtemp
 from datetime import datetime, timedelta
 from shutil import copy, rmtree
@@ -285,28 +286,26 @@ def main():
     config = get_config()
 
     log('Accessing SQLite database {}'.format(DB_FILE))
-    db = Database(DB_FILE)
-    db.connect()
+    with closing(Database(DB_FILE)) as db:
+        db.connect()
 
-    if not args.no_update:
-        date = today()
-        karma = get_user_karma(config['user'])
-        db.add_karma(date, karma)
-        log(
-            'Karma for user {} on {} is {}'.format(
-                config['user'], date, karma))
+        if not args.no_update:
+            date = today()
+            karma = get_user_karma(config['user'])
+            db.add_karma(date, karma)
+            log(
+                'Karma for user {} on {} is {}'.format(
+                    config['user'], date, karma))
 
-    if not args.no_generate:
-        start_date, end_date, ranges = get_month_ranges(config['months'])
-        graphs = get_graph_data(db, ranges)
-        graph_steps = get_graph_steps(graphs)
-        karma_extremes = db.get_karma_extremes(
-            start=start_date, end=end_date)
-        generate_page(
-            config['user'], config['target-dir'], graphs, graph_steps,
-            karma_extremes, local=args.local)
-
-    db.close()
+        if not args.no_generate:
+            start_date, end_date, ranges = get_month_ranges(config['months'])
+            graphs = get_graph_data(db, ranges)
+            graph_steps = get_graph_steps(graphs)
+            karma_extremes = db.get_karma_extremes(
+                start=start_date, end=end_date)
+            generate_page(
+                config['user'], config['target-dir'], graphs, graph_steps,
+                karma_extremes, local=args.local)
 
 
 if __name__ == '__main__':
