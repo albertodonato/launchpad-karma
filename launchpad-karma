@@ -310,6 +310,4 @@ def main():
 
 
 if __name__ == '__main__':
-    print(NAME)
-    sys.exit(0)
     main()
