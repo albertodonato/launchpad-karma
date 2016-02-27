@@ -112,7 +112,7 @@ class Database:
         '''Create database tables.'''
         self._execute(
             'CREATE TABLE karma ('
-            '  date DATE NOT NULL,'
+            '  date DATE PRIMARY KEY,'
             '  value INTEGER NOT NULL)')
 
     def _execute(self, statement, args=None):
