@@ -12,36 +12,36 @@ JavaScript and css files) in the specified target directory.
 Installing
 ----------
 
-1. get the source tree::
+- get the source tree::
 
-     $ git clone https://bitbucket.org/ack/launchpad-karma.git
+    $ git clone https://bitbucket.org/ack/launchpad-karma.git
 
-2. install the following dependencies:
+- install the following dependencies:
 
-   - Jinja2
-   - launchpadlib
+  - Jinja2
+  - launchpadlib
 
-   This can be done via packages from your distribution or with ``pip``::
+  This can be done via packages from your distribution or with ``pip``::
 
-     $ cd launchpad-karma
-     $ pip install -R requirements.txt
+    $ cd launchpad-karma
+    $ pip install -R requirements.txt
 
 
 Setting it up
 -------------
 
 
-2. copy ``launchpad-karma.ini.template`` to ``launchpad-karma.ini`` and edit it
-   setting the ``user`` key to your launchpad username.  The target directory
-   for graphs and and the (maximum) number of months to plot can also be
-   changed.
+- copy ``launchpad-karma.ini.template`` to ``launchpad-karma.ini`` and edit it
+  setting the ``user`` key to your launchpad username.  The target directory
+  for graphs and and the (maximum) number of months to plot can also be
+  changed.
 
 
-3. edit your crontab::
+- edit your crontab::
 
-     $ crontab -e
+    $ crontab -e
 
-   by adding something like this (which runs the script at 23:30 every day)::
+  by adding something like this (which runs the script at 23:30 every day)::
 
-     # m h  dom mon dow   command
-     30 23 * * * /home/ack/launchpad-karma/launchpad-karma
+    # m h  dom mon dow   command
+    30 23 * * * /home/ack/launchpad-karma/launchpad-karma
