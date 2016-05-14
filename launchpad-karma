@@ -78,7 +78,8 @@ class Database:
     def add_karma(self, date, value):
         '''Add value for the specified date.'''
         self._execute(
-            'INSERT INTO karma (date, value) VALUES (?, ?)', [date, value])
+            'INSERT OR REPLACE INTO karma (date, value) VALUES (?, ?)',
+            [date, value])
 
     def get_karma(self, start=None, end=None):
         '''Return karma, optionally for the specified date range.'''
@@ -275,7 +276,7 @@ def get_parser():
     parser.add_argument(
         '--local', action='store_true',
         help=('Set protocol for web resources so that generated page can '
-              'be viewed locally.'))
+              'be viewed locally (for development).'))
     return parser
 
 

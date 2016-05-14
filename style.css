@@ -20,6 +20,10 @@ footer p {
     font-size: 15px;
 }
 
+canvas {
+    user-select: none;
+}
+
 .section-extremes,
 .section-graph {
     margin: 20px 10% 40px;
