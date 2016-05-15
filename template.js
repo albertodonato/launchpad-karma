@@ -25,10 +25,9 @@ function plotChart(graphData) {
                      fontFamily: 'Ubuntu',
                      fontStyle: 300},
                  ticks: {
-                     stepSize: {{ graph_config.scale_step_width }},
-                     min: {{ graph_config.scale_start_value }},
-                     max : {{ graph_config.scale_start_value }} + {{ graph_config.scale_step_width }} * {{ graph_config.scale_steps }},
-                 }}
+                     min: {{ graph_config.y_axis.min }},
+                     max : {{ graph_config.y_axis.max }},
+                     stepSize: {{ graph_config.y_axis.step_width }}}}
             ]}
     };
 
