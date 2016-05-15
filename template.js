@@ -37,12 +37,25 @@ function plotChart(graphData) {
 // Set graph defaults
 Chart.defaults.global.defaultFontFamily = 'Ubuntu';
 Chart.defaults.global.defaultFontStyle = 300;
+Chart.defaults.global.defaultFontSize = 14;
 Chart.defaults.global.tooltips.titleFontFamily = 'Ubuntu';
-Chart.defaults.global.tooltips.titleFontStyle = 300;
+Chart.defaults.global.tooltips.titleFontStyle = 500;
+Chart.defaults.global.tooltips.titleFontSize = 14;
 Chart.defaults.global.tooltips.bodyFontFamily = 'Ubuntu';
 Chart.defaults.global.tooltips.bodyFontStyle = 300;
+Chart.defaults.global.tooltips.bodyFontSize = 14;
 Chart.defaults.global.tooltips.footerFontFamily = 'Ubuntu';
 Chart.defaults.global.tooltips.footerFontStyle = 300;
+Chart.defaults.global.tooltips.footerFontSize = 14;
+Chart.defaults.global.tooltips.callbacks.title = function(tooltipItems, data) {
+    return tooltipItems[0].yLabel;
+};
+Chart.defaults.global.tooltips.callbacks.label = function(tooltipItem, data) {
+    var day = tooltipItem.xLabel;
+    var month = data.datasets[0].label;
+    console.log(day + ' ' + month);
+    return day + ' ' + month;
+};
 Chart.defaults.global.legend.display = false;
 
 // Plot data
