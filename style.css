@@ -40,5 +40,7 @@ canvas {
 
 .graph-canvas {
     width: 100% !important;
+    min-height: 350px;
+    max-height: 350px;
     height: 350px;
 }

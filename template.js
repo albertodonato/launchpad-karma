@@ -1,34 +1,50 @@
 // Plot a char for specified data
 function plotChart(graphData) {
-    var context = document.getElementById(graphData.id).getContext('2d'),
-        data = {
-            labels: graphData.x,
-            datasets: [
-                {
-                    label: graphData.label,
-                    data: graphData.y,
-                    fillColor: 'rgba(151,187,205,0.2)',
-                    strokeColor: 'rgba(151,187,205,1)',
-                    pointColor: 'rgba(151,187,205,1)',
-                    pointStrokeColor: '#fff',
-                    pointHighlightFill: '#fff',
-                    pointHighlightStroke: 'rgba(151,187,205,1)'
-                }]},
-        options = {
-            scaleOverride: true,
-            scaleSteps : {{ graph_config.scale_steps }},
-            scaleStepWidth : {{ graph_config.scale_step_width }},
-            scaleStartValue : {{ graph_config.scale_start_value }}};
+    var context = document.getElementById(graphData.id).getContext('2d');
+    var data = {
+        labels: graphData.x,
+        datasets: [
+            {label: graphData.label,
+             data: graphData.y,
+             backgroundColor: 'rgba(151,187,205,0.2)',
+             borderColor: 'rgba(151,187,205,1)',
+             pointBackgroundColor: 'rgba(151,187,205,1)',
+             pointBorderColor: '#fff',
+             pointBorderWidth: 1,
+             pointRadius: 3,
+             pointHoverBackgroundColor: '#fff',
+             pointHoverBorderColor: 'rgba(151,187,205,1)',
+             pointHoverRadius: 5}
+        ]
+    };
+    var options = {
+        scales: {
+            yAxes : [
+                {type: 'linear',
+                 scaleLabel: {
+                     fontFamily: 'Ubuntu',
+                     fontStyle: 300},
+                 ticks: {
+                     stepSize: {{ graph_config.scale_step_width }},
+                     min: {{ graph_config.scale_start_value }},
+                     max : {{ graph_config.scale_start_value }} + {{ graph_config.scale_step_width }} * {{ graph_config.scale_steps }},
+                 }}
+            ]}
+    };
 
-    return new Chart(context).Line(data, options);
+    return new Chart.Line(context, {data: data, options: options});
 };
 
-// Update graph defaults
-Chart.defaults.global.scaleFontFamily = 'Ubuntu';
-Chart.defaults.global.scaleFontStyle = 300;
-Chart.defaults.global.tooltipFontFamily = 'Ubuntu';
-Chart.defaults.global.tooltipFontStyle = 300;
-Chart.defaults.global.responsive = true;
+// Set graph defaults
+Chart.defaults.global.defaultFontFamily = 'Ubuntu';
+Chart.defaults.global.defaultFontStyle = 300;
+Chart.defaults.global.tooltips.titleFontFamily = 'Ubuntu';
+Chart.defaults.global.tooltips.titleFontStyle = 300;
+Chart.defaults.global.tooltips.bodyFontFamily = 'Ubuntu';
+Chart.defaults.global.tooltips.bodyFontStyle = 300;
+Chart.defaults.global.tooltips.footerFontFamily = 'Ubuntu';
+Chart.defaults.global.tooltips.footerFontStyle = 300;
+Chart.defaults.global.legend.display = false;
 
 // Plot data
 {% for graph in graphs %}
