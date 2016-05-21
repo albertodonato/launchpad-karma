@@ -6,15 +6,13 @@ function plotChart(graphData) {
         datasets: [
             {label: graphData.label,
              data: graphData.y,
-             backgroundColor: 'rgba(151,187,205,0.2)',
-             borderColor: 'rgba(151,187,205,1)',
-             pointBackgroundColor: 'rgba(151,187,205,1)',
-             pointBorderColor: '#fff',
-             pointBorderWidth: 1,
-             pointRadius: 3,
-             pointHoverBackgroundColor: '#fff',
-             pointHoverBorderColor: 'rgba(151,187,205,1)',
-             pointHoverRadius: 5}
+             backgroundColor: 'rgba(151, 187, 205, 0.2)',
+             borderColor: 'rgb(151, 187, 205)',
+             pointBackgroundColor: 'rgb(151, 187, 205)',
+             pointBorderColor: '#fafafa',
+             pointHoverBackgroundColor: '#fafafa',
+             pointHoverBorderColor: 'rgb(151, 187, 205)'
+            }
         ]
     };
     var options = {
@@ -39,6 +37,8 @@ Chart.defaults.global.defaultFontFamily = 'Ubuntu';
 Chart.defaults.global.defaultFontStyle = 300;
 Chart.defaults.global.defaultFontSize = 14;
 Chart.defaults.global.legend.display = false;
+Chart.defaults.global.elements.point.radius = 3;
+Chart.defaults.global.elements.point.hoverRadius = 5;
 Chart.defaults.global.tooltips.titleFontFamily = 'Ubuntu';
 Chart.defaults.global.tooltips.titleFontStyle = 500;
 Chart.defaults.global.tooltips.titleFontSize = 14;
