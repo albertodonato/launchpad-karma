@@ -1,3 +1,5 @@
+{# -*- mode: jinja2 -*- #}
+
 // Plot a char for specified data
 function plotChart(graphData) {
     var context = document.getElementById(graphData.id).getContext('2d');
