@@ -38,14 +38,14 @@ from launchpadlib.uris import LPNET_SERVICE_ROOT
 
 NAME = os.path.basename(__file__)
 
-# The dir in which this file is located
 DIR = os.path.dirname(__file__)
+SRC_DIR = os.path.join(DIR, 'src')
 # Configuration file
 CONFIG_FILE = os.path.join(DIR, '{}.ini'.format(NAME))
 # Database file
 DB_FILE = os.path.join(DIR, 'karma.sqlite')
 # CSS file for HTML page
-CSS_FILE = os.path.join(DIR, 'style.css')
+CSS_FILE = os.path.join(SRC_DIR, 'style.css')
 
 # The base number of steps for the graph Y-axis. The actual number can be
 # larger if needed to avoid clipping.
@@ -235,7 +235,7 @@ def generate_page(user, target_dir, graphs, y_scale, extremes, local=False):
     if not os.path.isdir(target_dir):
         os.makedirs(target_dir)
 
-    environment = Environment(loader=FileSystemLoader(DIR))
+    environment = Environment(loader=FileSystemLoader(SRC_DIR))
     environment.filters['json'] = json.dumps
     html_template = environment.get_template('template.html')
     js_template = environment.get_template('template.js')
