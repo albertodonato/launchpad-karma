@@ -39,7 +39,7 @@ canvas {
 }
 
 .graph-canvas {
-    width: 100% !important;
+    width: 100%;
 }
 
 @media (min-width: 768px) {
