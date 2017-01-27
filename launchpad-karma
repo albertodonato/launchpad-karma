@@ -219,8 +219,8 @@ def get_graph_data(db, ranges):
 
 
 def get_graph_y_scale(graphs, min_y, max_y):
-    '''Return graph Y axis scale details  based on values from all graphs.'''
-    step_width = (max_y - min_y) / BASE_GRAPH_STEPS
+    '''Return graph Y axis scale details based on values from all graphs.'''
+    step_width = max((max_y - min_y) / BASE_GRAPH_STEPS, BASE_GRAPH_STEPS)
     width_base = 10 ** int(math.log10(step_width))
     step_width = int(step_width / width_base) * width_base
 

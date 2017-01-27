@@ -41,6 +41,7 @@ Chart.defaults.global.defaultFontSize = 14;
 Chart.defaults.global.legend.display = false;
 Chart.defaults.global.elements.point.radius = 3;
 Chart.defaults.global.elements.point.hoverRadius = 5;
+Chart.defaults.global.tooltips.displayColors = false;
 Chart.defaults.global.tooltips.titleFontFamily = 'Ubuntu';
 Chart.defaults.global.tooltips.titleFontStyle = 500;
 Chart.defaults.global.tooltips.titleFontSize = 14;

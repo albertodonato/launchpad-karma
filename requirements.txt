@@ -1,2 +1,2 @@
-Jinja
+Jinja2
 launchpadlib
