@@ -24,6 +24,10 @@ canvas {
     user-select: none;
 }
 
+.revision {
+    font-size: 10px;
+}
+
 .section-extremes,
 .section-graph {
     margin: 20px 10% 40px;

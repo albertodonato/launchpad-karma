@@ -28,11 +28,13 @@ from shutil import copy, rmtree
 from argparse import ArgumentParser
 from configparser import ConfigParser
 from calendar import monthrange
+from subprocess import check_output
 import json
 import math
 from sqlite3 import connect, PARSE_DECLTYPES
 
 from jinja2 import Environment, FileSystemLoader
+
 from launchpadlib.launchpad import Launchpad
 from launchpadlib.uris import LPNET_SERVICE_ROOT
 
@@ -229,7 +231,8 @@ def get_graph_y_scale(graphs, min_y, max_y):
     return GraphScale(min_value, max_value, step_width)
 
 
-def generate_page(user, target_dir, graphs, y_scale, extremes, local=False):
+def generate_page(user, target_dir, graphs, y_scale, extremes, git_revision,
+                  local=False):
     '''Generate the HTML page for graphs.'''
     log('Output directory: {}'.format(target_dir))
     if not os.path.isdir(target_dir):
@@ -254,7 +257,8 @@ def generate_page(user, target_dir, graphs, y_scale, extremes, local=False):
                 'value': extremes[0][1]},
             'max': {
                 'date': format_date(extremes[1][0]),
-                'value': extremes[1][1]}}}
+                'value': extremes[1][1]}},
+        'git_revision': git_revision}
     log('Rendering HTML template')
     with open(os.path.join(target_dir, 'index.html'), 'w') as fd:
         fd.write(html_template.render(context))
@@ -295,6 +299,16 @@ def get_config():
     return config
 
 
+def get_git_hash():
+    '''Try to get the git revision'''
+    try:
+        output = check_output(['git', 'rev-parse', 'HEAD'])
+        return output.decode('utf-8').strip()
+    except Exception:
+        # Don't fail on exceptions
+        return None
+
+
 def main():
     args = get_parser().parse_args()
     config = get_config()
@@ -318,9 +332,10 @@ def main():
                 start=start_date, end=end_date)
             extreme_values = tuple(zip(*karma_extremes))[1]
             y_scale = get_graph_y_scale(graphs, *extreme_values)
+            git_revision = get_git_hash()
             generate_page(
                 config['user'], config['target-dir'], graphs, y_scale,
-                karma_extremes, local=args.local)
+                karma_extremes, git_revision, local=args.local)
 
 
 if __name__ == '__main__':

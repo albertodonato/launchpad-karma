@@ -56,7 +56,10 @@
       <div class="container">
         <p class="text-center">
           Generated with
-          <a href="https://bitbucket.org/ack/launchpad-karma">launchpad-karma</a>.
+          <a href="https://bitbucket.org/ack/launchpad-karma">launchpad-karma</a>
+          {% if git_revision %}
+            <small class="revision">({{ git_revision }})</small>
+          {% endif %}
         </p>
       </div>
     </footer>
