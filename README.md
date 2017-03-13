@@ -12,8 +12,10 @@ files) in the specified target directory.
 
 - get the source tree:
 
-```
+```shell
+
 $ git clone https://bitbucket.org/ack/launchpad-karma.git
+
 ```
 
 - install the following dependencies:
@@ -23,9 +25,11 @@ $ git clone https://bitbucket.org/ack/launchpad-karma.git
 
   This can be done via packages from your distribution or with `pip`:
 
-```
+```shell
+
 $ cd launchpad-karma
 $ pip install -R requirements.txt
+
 ```
 
 ## Setting it up
@@ -38,8 +42,10 @@ $ pip install -R requirements.txt
 
 - edit your crontab:
 
-```
+```shell
+
 $ crontab -e
+
 ```
 
   by adding something like this (which runs the script at 23:30 every day):
