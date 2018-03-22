@@ -1,7 +1,7 @@
-# launchpad-karma
+# launchpad-karma - track your Launchpad Karma
 
-A simple script to track
-your [Launchpad karma](https://help.launchpad.net/YourAccount/Karma) over time.
+`launchpad-karma ` is a a simple script to track your [Launchpad
+karma](https://help.launchpad.net/YourAccount/Karma) over time.
 
 It's meant to be run on a daily basis (usually by `cron`).  At every run, it
 collects the karma for the current day and stores it in a SQLite database. Then
@@ -14,7 +14,7 @@ files) in the specified target directory.
 
 ```shell
 
-$ git clone https://bitbucket.org/ack/launchpad-karma.git
+$ git clone https://github.com/albertodonato/launchpad-karma
 
 ```
 
@@ -34,21 +34,12 @@ $ pip install -R requirements.txt
 
 ## Setting it up
 
-
 - copy `launchpad-karma.ini.template` to `launchpad-karma.ini` and edit it
   setting the `user` key to your launchpad username.  The target directory for
   graphs and and the (maximum) number of months to plot can also be changed.
 
-
-- edit your crontab:
-
-```shell
-
-$ crontab -e
-
-```
-
-  by adding something like this (which runs the script at 23:30 every day):
+- edit your crontab with `crontab -e` and adding something like this (which
+  runs the script at 23:30 every day):
 
 ```
 # m h  dom mon dow   command
