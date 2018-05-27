@@ -21,6 +21,7 @@
 import sys
 import os
 from collections import namedtuple
+from contextlib import contextmanager
 from tempfile import mkdtemp
 from datetime import datetime, timedelta
 from shutil import copy, rmtree
@@ -37,8 +38,8 @@ from jinja2 import Environment, FileSystemLoader
 from launchpadlib.launchpad import Launchpad
 from launchpadlib.uris import LPNET_SERVICE_ROOT
 
-NAME = os.path.basename(__file__)
 
+NAME = os.path.basename(__file__)
 DIR = os.path.dirname(__file__)
 SRC_DIR = os.path.join(DIR, 'src')
 # Configuration file
@@ -52,6 +53,8 @@ CSS_FILE = os.path.join(SRC_DIR, 'style.css')
 # larger if needed to avoid clipping.
 BASE_GRAPH_STEPS = 10
 
+
+Karma = namedtuple('Karma', ('date', 'value'))
 
 GraphScale = namedtuple('GraphScale', ('min', 'max', 'step_width'))
 
@@ -70,7 +73,6 @@ class Database:
     def __init__(self, filename):
         self._filename = filename
         self._conn = None
-        self._cur = None
 
     def __enter__(self):
         self.connect()
@@ -83,15 +85,20 @@ class Database:
         """Connect to the database."""
         must_create = not os.path.exists(self._filename)
         self._conn = connect(self._filename, detect_types=PARSE_DECLTYPES)
-        self._cur = self._conn.cursor()
         if must_create:
             self._create()
 
-    def add_karma(self, date, value):
+    def close(self):
+        """Close db connection."""
+        if not self._conn:
+            raise NotConnected()
+        self._conn.close()
+        self._conn = None
+
+    def add_karma(self, karma):
         """Add value for the specified date."""
         self._execute(
-            'INSERT OR REPLACE INTO karma (date, value) VALUES (?, ?)',
-            [date, value])
+            'INSERT OR REPLACE INTO karma (date, value) VALUES (?, ?)', karma)
 
     def get_karma(self, start=None, end=None):
         """Return karma, optionally for the specified date range."""
@@ -100,7 +107,7 @@ class Database:
             where_clause = 'WHERE ' + where_clause
         query = 'SELECT date, value FROM karma {} ORDER BY DATE ASC'.format(
             where_clause)
-        return self._execute(query, args)
+        return self._execute(query, args, row_class=Karma)
 
     def get_karma_extremes(self, start=None, end=None):
         """Return minimum and maximum for karma, as (date, value) tuples."""
@@ -118,14 +125,6 @@ class Database:
         max_value = self._execute(max_query, args)[0]
         return min_value, max_value
 
-    def close(self):
-        """Close db connection."""
-        if not self._conn:
-            raise NotConnected()
-        self._conn.close()
-        self._conn = None
-        self._cur = None
-
     def _create(self):
         """Create database tables."""
         self._execute(
@@ -133,17 +132,18 @@ class Database:
             '  date DATE PRIMARY KEY,'
             '  value INTEGER NOT NULL)')
 
-    def _execute(self, statement, args=None):
+    def _execute(self, statement, args=None, row_class=None):
         """Execute a query"""
         if not self._conn:
             raise NotConnected()
 
-        with self._conn:
+        with self._use_row_class(self._conn, row_class=row_class) as conn:
+            cursor = conn.cursor()
             if args is None:
-                self._cur.execute(statement)
+                cursor.execute(statement)
             else:
-                self._cur.execute(statement, args)
-            return self._cur.fetchall()
+                cursor.execute(statement, args)
+            return cursor.fetchall()
 
     def _get_date_range_clause(self, start=None, end=None):
         """Return a WHERE clause for the date range."""
@@ -156,6 +156,16 @@ class Database:
             clauses.append('date <= ?')
             args.append(end)
         return ' AND '.join(clauses), args
+
+    @contextmanager
+    def _use_row_class(self, conn, row_class=None):
+        """Wrap the cursor to return instances of the specified row class."""
+        old_factory = conn.row_factory
+        if row_class:
+            conn.row_factory = lambda cursor, row: row_class(*row)
+        with conn:
+            yield conn
+        conn.row_factory = old_factory
 
 
 def log(message):
@@ -206,11 +216,11 @@ def get_graph_data(db, ranges):
     """Return data for graphs."""
     graphs = []
     for start, end in ranges:
-        values = db.get_karma(start=start, end=end)
-        if not values:
+        karmas = db.get_karma(start=start, end=end)
+        if not karmas:
             continue
 
-        day_values = {date.day: value for date, value in values}
+        day_values = {karma.date.day: karma.value for karma in karmas}
         _, last_day_of_month = monthrange(start.year, start.month)
 
         x = list(range(1, last_day_of_month + 1))
@@ -322,12 +332,10 @@ def main():
     log('Accessing SQLite database {}'.format(DB_FILE))
     with Database(DB_FILE) as db:
         if not args.no_update:
-            date = today()
-            karma = get_user_karma(config['user'])
-            db.add_karma(date, karma)
-            log(
-                'Karma for user {} on {} is {}'.format(
-                    config['user'], date, karma))
+            karma = Karma(today(), get_user_karma(config['user']))
+            db.add_karma(karma)
+            template = 'Karma for user {user} on {karma.date} is {karma.value}'
+            log(template.format(user=config['user'], karma=karma))
 
         if not args.no_generate:
             _, _, ranges = get_month_ranges(config['months'])
