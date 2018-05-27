@@ -330,10 +330,9 @@ def main():
                     config['user'], date, karma))
 
         if not args.no_generate:
-            start_date, end_date, ranges = get_month_ranges(config['months'])
+            _, _, ranges = get_month_ranges(config['months'])
             graphs = get_graph_data(db, ranges)
-            karma_extremes = db.get_karma_extremes(
-                start=start_date, end=end_date)
+            karma_extremes = db.get_karma_extremes()
             extreme_values = tuple(zip(*karma_extremes))[1]
             y_scale = get_graph_y_scale(graphs, *extreme_values)
             git_revision = get_git_hash()
