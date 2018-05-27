@@ -21,7 +21,6 @@
 import sys
 import os
 from collections import namedtuple
-from contextlib import closing
 from tempfile import mkdtemp
 from datetime import datetime, timedelta
 from shutil import copy, rmtree
@@ -72,6 +71,13 @@ class Database:
         self._filename = filename
         self._conn = None
         self._cur = None
+
+    def __enter__(self):
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
     def connect(self):
         """Connect to the database."""
@@ -314,9 +320,7 @@ def main():
     config = get_config()
 
     log('Accessing SQLite database {}'.format(DB_FILE))
-    with closing(Database(DB_FILE)) as db:
-        db.connect()
-
+    with Database(DB_FILE) as db:
         if not args.no_update:
             date = today()
             karma = get_user_karma(config['user'])
