@@ -58,15 +58,15 @@ GraphScale = namedtuple('GraphScale', ('min', 'max', 'step_width'))
 
 
 class MissingConfig(Exception):
-    '''Missing configuration option.'''
+    """Missing configuration option."""
 
 
 class NotConnected(Exception):
-    '''Not connected to the database'''
+    """Not connected to the database"""
 
 
 class Database:
-    '''SQLite3 database wrapper.'''
+    """SQLite3 database wrapper."""
 
     def __init__(self, filename):
         self._filename = filename
@@ -74,7 +74,7 @@ class Database:
         self._cur = None
 
     def connect(self):
-        '''Connect to the database.'''
+        """Connect to the database."""
         must_create = not os.path.exists(self._filename)
         self._conn = connect(self._filename, detect_types=PARSE_DECLTYPES)
         self._cur = self._conn.cursor()
@@ -82,13 +82,13 @@ class Database:
             self._create()
 
     def add_karma(self, date, value):
-        '''Add value for the specified date.'''
+        """Add value for the specified date."""
         self._execute(
             'INSERT OR REPLACE INTO karma (date, value) VALUES (?, ?)',
             [date, value])
 
     def get_karma(self, start=None, end=None):
-        '''Return karma, optionally for the specified date range.'''
+        """Return karma, optionally for the specified date range."""
         where_clause, args = self._get_date_range_clause(start=start, end=end)
         if where_clause:
             where_clause = 'WHERE ' + where_clause
@@ -97,7 +97,7 @@ class Database:
         return self._execute(query, args)
 
     def get_karma_extremes(self, start=None, end=None):
-        '''Return minimum and maximum for karma, as (date, value) tuples.'''
+        """Return minimum and maximum for karma, as (date, value) tuples."""
         where_clause, args = self._get_date_range_clause(start=start, end=end)
         if where_clause:
             where_clause = 'WHERE ' + where_clause
@@ -113,7 +113,7 @@ class Database:
         return min_value, max_value
 
     def close(self):
-        '''Close db connection.'''
+        """Close db connection."""
         if not self._conn:
             raise NotConnected()
         self._conn.close()
@@ -121,14 +121,14 @@ class Database:
         self._cur = None
 
     def _create(self):
-        '''Create database tables.'''
+        """Create database tables."""
         self._execute(
             'CREATE TABLE karma ('
             '  date DATE PRIMARY KEY,'
             '  value INTEGER NOT NULL)')
 
     def _execute(self, statement, args=None):
-        '''Execute a query'''
+        """Execute a query"""
         if not self._conn:
             raise NotConnected()
 
@@ -140,7 +140,7 @@ class Database:
             return self._cur.fetchall()
 
     def _get_date_range_clause(self, start=None, end=None):
-        '''Return a WHERE clause for the date range.'''
+        """Return a WHERE clause for the date range."""
         args = []
         clauses = []
         if start:
@@ -153,12 +153,12 @@ class Database:
 
 
 def log(message):
-    '''Log a message to stderr.'''
+    """Log a message to stderr."""
     sys.stderr.write(message + '\n')
 
 
 def get_user_karma(user):
-    '''Return the karma for a user.'''
+    """Return the karma for a user."""
     tempdir = mkdtemp(prefix='{}-'.format(NAME))
     lp = Launchpad.login_anonymously(
         NAME, service_root=LPNET_SERVICE_ROOT,
@@ -169,20 +169,20 @@ def get_user_karma(user):
 
 
 def today():
-    '''Return the current date as a 'YYYY-MM-DD' string.'''
+    """Return the current date as a 'YYYY-MM-DD' string."""
     return datetime.utcnow().date().isoformat()
 
 
 def format_date(date):
-    '''Convert date to string.'''
+    """Convert date to string."""
     return date.strftime('%e %B %Y').strip()
 
 
 def get_month_ranges(months):
-    '''Return date ranges for the specified of months back.
+    """Return date ranges for the specified of months back.
 
     Return a 3-tuple with (min-date, max-date, ranges).
-    '''
+    """
     ranges = []
     max_date = end = datetime.utcnow().date()
     start = end.replace(day=1)
@@ -197,7 +197,7 @@ def get_month_ranges(months):
 
 
 def get_graph_data(db, ranges):
-    '''Return data for graphs.'''
+    """Return data for graphs."""
     graphs = []
     for start, end in ranges:
         values = db.get_karma(start=start, end=end)
@@ -221,7 +221,7 @@ def get_graph_data(db, ranges):
 
 
 def get_graph_y_scale(graphs, min_y, max_y):
-    '''Return graph Y axis scale details based on values from all graphs.'''
+    """Return graph Y axis scale details based on values from all graphs."""
     step_width = max((max_y - min_y) / BASE_GRAPH_STEPS, BASE_GRAPH_STEPS)
     width_base = 10 ** int(math.log10(step_width))
     step_width = int(step_width / width_base) * width_base
@@ -233,7 +233,7 @@ def get_graph_y_scale(graphs, min_y, max_y):
 
 def generate_page(user, target_dir, graphs, y_scale, extremes, git_revision,
                   local=False):
-    '''Generate the HTML page for graphs.'''
+    """Generate the HTML page for graphs."""
     log('Output directory: {}'.format(target_dir))
     if not os.path.isdir(target_dir):
         os.makedirs(target_dir)
@@ -269,7 +269,7 @@ def generate_page(user, target_dir, graphs, y_scale, extremes, git_revision,
 
 
 def get_parser():
-    '''Return a command line parser'''
+    """Return a command line parser"""
     parser = ArgumentParser(
         description='Collect and graph user karma from Launchpad.')
     parser.add_argument(
@@ -286,7 +286,7 @@ def get_parser():
 
 
 def get_config():
-    '''Return configuration options.'''
+    """Return configuration options."""
     defaults = {
         'months': 12,
         'target-dir': 'output'}
@@ -300,7 +300,7 @@ def get_config():
 
 
 def get_git_hash():
-    '''Try to get the git revision'''
+    """Try to get the git revision"""
     try:
         output = check_output(['git', 'rev-parse', 'HEAD'])
         return output.decode('utf-8').strip()
