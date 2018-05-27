@@ -18,23 +18,22 @@
 # along with launchpad-karma.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-import sys
-import os
-from collections import namedtuple
-from contextlib import contextmanager
-from tempfile import mkdtemp
-from datetime import datetime, timedelta
-from shutil import copy, rmtree
 from argparse import ArgumentParser
-from configparser import ConfigParser
 from calendar import monthrange
-from subprocess import check_output
+from collections import namedtuple
+from configparser import ConfigParser
+from contextlib import contextmanager
+from datetime import datetime, timedelta
 import json
 import math
+import os
+from shutil import copy, rmtree
 from sqlite3 import connect, PARSE_DECLTYPES
+import sys
+from subprocess import check_output
+from tempfile import mkdtemp
 
 from jinja2 import Environment, FileSystemLoader
-
 from launchpadlib.launchpad import Launchpad
 from launchpadlib.uris import LPNET_SERVICE_ROOT
 
@@ -55,6 +54,7 @@ BASE_GRAPH_STEPS = 10
 
 
 Karma = namedtuple('Karma', ('date', 'value'))
+KarmaExtremes = namedtuple('KarmaExtremes', ('min', 'max'))
 
 GraphScale = namedtuple('GraphScale', ('min', 'max', 'step_width'))
 
@@ -121,9 +121,9 @@ class Database:
         max_query = ' '.join(
             [select_clause, where_clause,
              'ORDER BY value DESC, date DESC LIMIT 1'])
-        min_value = self._execute(min_query, args)[0]
-        max_value = self._execute(max_query, args)[0]
-        return min_value, max_value
+        min_karma = self._execute(min_query, args, row_class=Karma)[0]
+        max_karma = self._execute(max_query, args, row_class=Karma)[0]
+        return KarmaExtremes(min_karma, max_karma)
 
     def _create(self):
         """Create database tables."""
@@ -269,11 +269,11 @@ def generate_page(user, target_dir, graphs, y_scale, extremes, git_revision,
         'graphs': graphs,
         'extremes': {
             'min': {
-                'date': format_date(extremes[0][0]),
-                'value': extremes[0][1]},
+                'date': format_date(extremes.min.date),
+                'value': extremes.min.value},
             'max': {
-                'date': format_date(extremes[1][0]),
-                'value': extremes[1][1]}},
+                'date': format_date(extremes.max.date),
+                'value': extremes.max.value}},
         'git_revision': git_revision}
     log('Rendering HTML template')
     with open(os.path.join(target_dir, 'index.html'), 'w') as fd:
